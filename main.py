@@ -2,8 +2,8 @@ import colors as c
 import pygame as g
 import random as r
 import math as m
-g.init()
 
+g.init()
 SCW = 1900
 SCH = 1000
 speed_multiplier = 1.2
@@ -12,55 +12,81 @@ stop_multiplier = 0.5
 speed_max = 7
 angle_max = 5
 gen_count = 1
-d_angle = 0
-
 count = 50
-
+d_angle = 0
 weight_range = 0.12
 bias_range = 0.12
+DNA_INSERT_B = [0.1, -0.11, -0.06, -0.07, -0.06, 0.11, -0.03, -0.11, -0.07, 0.12, 0.1, 0.1, 0.07, -0.11, 0.12, 0.01, 0.08, 0.04, 0.11, -0.04]
+DNA_INSERT_W = [-0.08, -0.03, 0.11, 0.04, 0.01, 0.12, -0.06, -0.0, -0.07, 0.07, 0.03, 0.03, 0.09, -0.06, -0.1, 0.08, -0.02, -0.03, -0.12, -0.05, 0.05, -0.11, -0.04, -0.01, 0.02, -0.05, 0.09, 0.07, -0.01, -0.02, 0.05, -0.07, 0.08, 0.07, -0.01, 0.02, 0.03, 0.01, 0.04, -0.01, -0.08, 0.06, -0.07, -0.03, -0.1, 0.03, -0.05, -0.01, 0.05, -0.11, -0.08, -0.11, -0.03, -0.1, -0.07, -0.04, -0.08, -0.07, 0.11, 0.03, 0.02, 0.03, 0.08, -0.0, 0.01, 0.04, -0.03, 0.11, -0.09, 0.1, -0.02, 0.11, -0.07, 0.03, 0.09, -0.11, 0.09, -0.0, 0.07, -0.09, 0.08, -0.07, 0.11, -0.08, 0.11, 0.06, -0.0, -0.1, 0.04, -0.07, -0.05, 0.09, 0.05, 0.09, -0.02, 0.05, -0.02, -0.03, -0.08, 0.09, -0.07, -0.0, 0.09, -0.04, 0.08, 0.09, 0.04, -0.04, 0.08, -0.0, -0.01, -0.09, -0.06, 0.04]
 
-fl_forward = fl_right = fl_left = False
+fl_lines =True
+
+fl_forward = fl_right = fl_left = fl_left = False
 sc = g.display.set_mode((SCW, SCH))
 #sc = g.display.set_mode((SCW, SCH), g.FULLSCREEN)
+class Fitness_meter:
+    def __init__(self,cor,rotation):
+        self.original_image = g.image.load(f'src\\Fitness_meter.png').convert_alpha()
+        self.image = self.original_image
+        self.image = g.transform.rotate(self.image,rotation)
+        self.rect = self.image.get_rect()
+        self.rect.center = cor
+
+
 
 class Draha():
     def __init__(self):
-        self.image = g.image.load('src\draha01.png').convert_alpha()
+        self.image = g.image.load(f'src\\draha01.png').convert_alpha()
         self.rect = self.image.get_rect()
 
 draha01 = Draha()
+meters = [
+    Fitness_meter((65, 434),90),
+    Fitness_meter((167, 192),45),
+    Fitness_meter((396, 71),0),
+    Fitness_meter((605, 188),-45),
+    Fitness_meter((644, 303),-45),
+    Fitness_meter((690, 363),0),
+    Fitness_meter((755, 377),45)
+]
+
 
 class NN():
-    def __init__(self):
+    def __init__(self,dna_injection_W,dna_injection_B):
         self.original_image = g.image.load(f'src\\auto01.png').convert_alpha()
         self.original_image.set_colorkey(c.WHITE)
         self.image = self.original_image
-        
         self.rect = self.image.get_rect()
+
+        self.fitnesses = []
+        self.fitness = 0
         self.rect.center = (202, 490)
         self.speed = 0
         self.angle = 90
+        self.stop = False
 
-
-
-        # 120 weights + 21 biases 
-        self.dnaW = []
-        self.dnaB = []
-        for _ in range(0,114):
-            self.dnaW.append(
-                round(
-                    r.uniform(-weight_range,weight_range),
-                    2
-                )
-            )
-
-        for _ in range(0,20):
-                    self.dnaB.append(
-                        round(
-                            r.uniform(-bias_range,bias_range),
-                            2
-                        )
+        if dna_injection_W:
+            self.dnaW = dna_injection_W
+            self.dnaB = dna_injection_B
+        else:
+            # 114 weights + 21 biases 
+            self.dnaW = []
+            self.dnaB = []
+            for _ in range(0,114):
+                self.dnaW.append(
+                    round(
+                        r.uniform(-weight_range,weight_range),
+                        2
                     )
+                )
+
+            for _ in range(0,20):
+                self.dnaB.append(
+                    round(
+                        r.uniform(-bias_range,bias_range),
+                        2
+                    )
+                )
 
     def predict(self,inputs):
         for i in range(len(inputs)):
@@ -166,45 +192,51 @@ class NN():
         ]
         #speed,angle
 #---------------------------------------------------------------------------------
-        #print(column4[0])
-        print(column4[1])
-        if not self.speed + column4[0] > 0:
-            self.speed = 0
-        elif not self.speed + column4[0] <speed_max:
-            self.speed = speed_max
-        else:
-            self.speed += column4[0]
+        
+        if not self.stop:
+            #print(column4[0])
+            #print(column4[1])
+            if not self.speed + column4[0] > 0:
+                self.speed = 0
+            elif not self.speed + column4[0] <speed_max:
+                self.speed = speed_max
+            else:
+                self.speed += column4[0]
 
-        if -angle_max < self.angle + column4[1] < angle_max:
-            self.angle += column4[1]
-        # Rotate from the ORIGINAL image
-        self.image = g.transform.rotate(
-            self.original_image,
-            self.angle
-        )
-        self.image.set_colorkey(c.WHITE)
-        # Keep the car in the same position
-        self.rect = self.image.get_rect(
-            center=self.rect.center
-        )
-        self.rect.centerx += m.cos(m.radians(self.angle)) * self.speed
-        self.rect.centery -= m.sin(m.radians(self.angle)) * self.speed
+            if -angle_max < column4[1] < angle_max:
+                self.angle += column4[1]
+            # Rotate from the ORIGINAL image
+            self.image = g.transform.rotate(
+                self.original_image,
+                self.angle
+            )
+            self.image.set_colorkey(c.WHITE)
+            # Keep the car in the same position
+            self.rect = self.image.get_rect(
+                center=self.rect.center
+            )
+            
+            self.rect.centerx += m.cos(m.radians(self.angle)) * self.speed
+            self.rect.centery -= m.sin(m.radians(self.angle)) * self.speed
 
     def draw(self):
-        self.angle
-
-        # Rotate from the ORIGINAL image
-        self.image = g.transform.rotate(
-            self.original_image,
+        if not self.stop:
             self.angle
-        )
-        self.image.set_colorkey(c.WHITE)
-        # Keep the car in the same position
-        self.rect = self.image.get_rect(
-            center=self.rect.center
-        )
-        self.rect.centerx += m.cos(m.radians(self.angle)) * self.speed
-        self.rect.centery -= m.sin(m.radians(self.angle)) * self.speed
+
+            # Rotate from the ORIGINAL image
+            
+            self.image = g.transform.rotate(
+                self.original_image,
+                self.angle
+            )
+            self.image.set_colorkey(c.WHITE)
+            # Keep the car in the same position
+            self.rect = self.image.get_rect(
+                center=self.rect.center
+            )
+
+            self.rect.centerx += m.cos(m.radians(self.angle)) * self.speed
+            self.rect.centery -= m.sin(m.radians(self.angle)) * self.speed
 
     def line(self):
         x = float(self.rect.centerx)
@@ -226,13 +258,14 @@ class NN():
             if color == c.BLACK:
                 distance_FW = dis
                 break
-        g.draw.line(
-            sc,
-            c.RED,
-            self.rect.center,
-            (int(x), int(y))
-        )
-#---------------------------------------------------------------------------
+        if fl_lines:
+            g.draw.line(
+                sc,
+                c.RED,
+                self.rect.center,
+                (int(x), int(y))
+            )
+    #---------------------------------------------------------------------------
         x = float(self.rect.centerx)
         y = float(self.rect.centery)
         distance_R = 0
@@ -252,12 +285,13 @@ class NN():
             if color == c.BLACK:
                 distance_R = dis
                 break
-        g.draw.line(
-            sc,
-            c.RED,
-            self.rect.center,
-            (int(x), int(y))
-        )
+        if fl_lines:
+            g.draw.line(
+                sc,
+                c.RED,
+                self.rect.center,
+                (int(x), int(y))
+            )
 #---------------------------------------------------------------------------
         x = float(self.rect.centerx)
         y = float(self.rect.centery)
@@ -278,12 +312,13 @@ class NN():
             if color == c.BLACK:
                 distance_L = dis
                 break
-        g.draw.line(
-            sc,
-            c.RED,
-            self.rect.center,
-            (int(x), int(y))
-        )
+        if fl_lines:
+            g.draw.line(
+                sc,
+                c.RED,
+                self.rect.center,
+                (int(x), int(y))
+            )
 #---------------------------------------------------------------------------
         x = float(self.rect.centerx)
         y = float(self.rect.centery)
@@ -304,12 +339,13 @@ class NN():
             if color == c.BLACK:
                 distance_R45 = dis
                 break
-        g.draw.line(
-            sc,
-            c.RED,
-            self.rect.center,
-            (int(x), int(y))
-        )
+        if fl_lines:
+            g.draw.line(
+                sc,
+                c.RED,
+                self.rect.center,
+                (int(x), int(y))
+            )
 #---------------------------------------------------------------------------
         x = float(self.rect.centerx)
         y = float(self.rect.centery)
@@ -330,18 +366,31 @@ class NN():
             if color == c.BLACK:
                 distance_L45 = dis
                 break
-        g.draw.line(
-            sc,
-            c.RED,
-            self.rect.center,
-            (int(x), int(y))
-        )
+        if fl_lines:
+            g.draw.line(
+                sc,
+                c.RED,
+                self.rect.center,
+                (int(x), int(y))
+            )
         return [distance_FW,distance_R,distance_L,distance_R45,distance_L45]
 
+    def check_wall(self):
+        x = self.rect.centerx
+        y = self.rect.centery
+        color = draha01.image.get_at((x, y))
+        if color == c.BLACK or color == c.DARK_GREEN:
+            self.stop = True
+
+    def add_fitness(self,fit):
+        if self.rect.colliderect(fit):
+            if not fit in self.fitnesses:
+                self.fitnesses.append(fit)
+                self.fitness += 1 
 auta = []
 
 for _ in range(count):
-    auta.append(NN())
+    auta.append(NN(DNA_INSERT_W,DNA_INSERT_B))
 
 
 
@@ -352,22 +401,43 @@ clock = g.time.Clock()
 FPS = 60
 
 
+
 print("curent gen: " + str(gen_count))
 
 while 1:
     for event in g.event.get():
-
         if event.type == g.KEYDOWN:
             if event.key == g.K_ESCAPE:
                 exit()
             if event.key == g.K_SPACE:
-                pass
+                heighest_fitness = 0
+                heighest_fitness_index = 0
+                for auto in auta:
+                    if auto.fitness > heighest_fitness:
+                        heighest_fitness = auto.fitness
+                        
+                        heighest_fitness_index = auta.index(auto)
+
+                print(heighest_fitness)
+                best_dnaW = auta[heighest_fitness_index].dnaW
+                best_dnaB = auta[heighest_fitness_index].dnaB
+
+                print(best_dnaW)
+                print(best_dnaB)
+                copy_auta = auta.copy()
+                for i in copy_auta:
+                    if i.fitness != heighest_fitness:
+                        auta.remove(i)
 
             if event.key == g.K_w:
+                for el in auta:
+                    print(el.fitness)
                 fl_forward = True
             if event.key == g.K_d:
                 fl_right = True
             if event.key == g.K_a:
+                fl_left = True
+            if event.key == g.K_s:
                 fl_left = True
 
         if event.type == g.KEYUP:
@@ -377,16 +447,32 @@ while 1:
                 fl_right = False
             if event.key == g.K_a:
                 fl_left = False
+            if event.key == g.K_s:
+                fl_left = False
 
     #### 
 
     sc.fill(c.BLACK)
     sc.blit(draha01.image,draha01.rect)
+    for element in meters:
+        sc.blit(element.image,element.rect)
+
+    #da
+    if fl_forward:
+        angle = 10
+    if fl_left:
+        angle = -10
+
     for element in auta:
         sc.blit(element.image,element.rect)
         inputs = element.line()
         element.predict(inputs)
+        element.check_wall()
+        for element2 in meters:
+            element.add_fitness(element2)
 
     d_angle = 0
+    
+
     g.display.update()
     clock.tick(FPS)
