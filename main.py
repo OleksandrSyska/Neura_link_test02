@@ -37,17 +37,17 @@ class Fitness_meter:
 class Draha():
     def __init__(self):
         self.image = g.image.load(f'src\\draha01.png').convert_alpha()
+        self.image.set_colorkey(c.WHITE)
         self.rect = self.image.get_rect()
-
 draha01 = Draha()
+
 meters = [
     Fitness_meter((65, 434),90),
-    Fitness_meter((167, 192),45),
+    Fitness_meter((90, 300),90),
     Fitness_meter((396, 71),0),
-    Fitness_meter((605, 188),-45),
-    Fitness_meter((644, 303),-45),
-    Fitness_meter((690, 363),0),
-    Fitness_meter((755, 377),45)
+    Fitness_meter((500, 250),0),
+    Fitness_meter((644, 303),0),
+    Fitness_meter((755, 377),0)
 ]
 
 
@@ -390,7 +390,7 @@ class NN():
 auta = []
 
 for _ in range(count):
-    auta.append(NN(DNA_INSERT_W,DNA_INSERT_B))
+    auta.append(NN(0,0))
 
 
 
@@ -452,11 +452,11 @@ while 1:
 
     #### 
 
-    sc.fill(c.BLACK)
-    sc.blit(draha01.image,draha01.rect)
+    sc.fill(c.LIGHT_BROWN)
+
     for element in meters:
         sc.blit(element.image,element.rect)
-
+    sc.blit(draha01.image,draha01.rect)
     #da
     if fl_forward:
         angle = 10
