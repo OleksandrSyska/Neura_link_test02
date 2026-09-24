@@ -6,7 +6,6 @@ import math as m
 g.init()
 SCW = 1900
 SCH = 1000
-<<<<<<< HEAD
 
 # CHANGEABLE OPTIONS # CHANGEABLE OPTIONS # CHANGEABLE OPTIONS #
 fl_lines = 1
@@ -34,22 +33,6 @@ gen_count = 1
 
 
 
-=======
-speed_multiplier = 1.2
-stop_multiplier = 0.5
-
-speed_max = 7
-angle_max = 5
-gen_count = 1
-count = 50
-d_angle = 0
-weight_range = 0.12
-bias_range = 0.12
-DNA_INSERT_B = [0.1, -0.11, -0.06, -0.07, -0.06, 0.11, -0.03, -0.11, -0.07, 0.12, 0.1, 0.1, 0.07, -0.11, 0.12, 0.01, 0.08, 0.04, 0.11, -0.04]
-DNA_INSERT_W = [-0.08, -0.03, 0.11, 0.04, 0.01, 0.12, -0.06, -0.0, -0.07, 0.07, 0.03, 0.03, 0.09, -0.06, -0.1, 0.08, -0.02, -0.03, -0.12, -0.05, 0.05, -0.11, -0.04, -0.01, 0.02, -0.05, 0.09, 0.07, -0.01, -0.02, 0.05, -0.07, 0.08, 0.07, -0.01, 0.02, 0.03, 0.01, 0.04, -0.01, -0.08, 0.06, -0.07, -0.03, -0.1, 0.03, -0.05, -0.01, 0.05, -0.11, -0.08, -0.11, -0.03, -0.1, -0.07, -0.04, -0.08, -0.07, 0.11, 0.03, 0.02, 0.03, 0.08, -0.0, 0.01, 0.04, -0.03, 0.11, -0.09, 0.1, -0.02, 0.11, -0.07, 0.03, 0.09, -0.11, 0.09, -0.0, 0.07, -0.09, 0.08, -0.07, 0.11, -0.08, 0.11, 0.06, -0.0, -0.1, 0.04, -0.07, -0.05, 0.09, 0.05, 0.09, -0.02, 0.05, -0.02, -0.03, -0.08, 0.09, -0.07, -0.0, 0.09, -0.04, 0.08, 0.09, 0.04, -0.04, 0.08, -0.0, -0.01, -0.09, -0.06, 0.04]
-
-fl_lines =True
->>>>>>> origin/main
 
 fl_forward = fl_right = fl_left = fl_left = False
 sc = g.display.set_mode((SCW, SCH))
@@ -91,7 +74,6 @@ class NN():
         self.fitnesses = []
         self.fitness = 0
         self.rect.center = (202, 490)
-<<<<<<< HEAD
         self.speed = 1
         self.angle = 90
         self.stop = False
@@ -104,19 +86,6 @@ class NN():
             self.dnaB = list(dna_injection_B)
         else:
             # 114 weights + 21 biases 
-=======
-        self.speed = 0
-        self.angle = 90
-        self.stop = False
-
-        if dna_injection_W:
-            self.dnaW = dna_injection_W
-            self.dnaB = dna_injection_B
-        else:
-            # 114 weights + 21 biases 
-            self.dnaW = []
-            self.dnaB = []
->>>>>>> origin/main
             for _ in range(0,114):
                 self.dnaW.append(
                     round(
@@ -155,10 +124,7 @@ class NN():
         cell_17 = 0
         cell_18 = 0
         cell_19 = 0
-<<<<<<< HEAD
         cell_20 = 0
-=======
->>>>>>> origin/main
 
         #TODO LINE 1
         for i in range(0,5):
@@ -185,7 +151,6 @@ class NN():
 
         #TODO LINE 3
         for i in range(0,6):
-<<<<<<< HEAD
             cell_7 += column1[i] * self.dnaW[i+30]
         for i in range(6,12):
             cell_8 += column1[i-6] * self.dnaW[i+30]
@@ -233,66 +198,12 @@ class NN():
             cell_19 += column3[i] * self.dnaW[i+90]
         for i in range(6,12):
             cell_20 += column3[i-6] * self.dnaW[i+90]
-=======
-            cell_6 += column1[i] * self.dnaW[i+30]
-        for i in range(6,12):
-            cell_7 += column1[i-6] * self.dnaW[i+30]
-        for i in range(12,18):
-            cell_8 += column1[i-12] * self.dnaW[i+30]
-        for i in range(18,24):
-            cell_9 += column1[i-18] * self.dnaW[i+30]
-        for i in range(24,30):
-            cell_10 += column1[i-24] * self.dnaW[i+30]
-        for i in range(30,36):
-            cell_11 += column1[i-30] * self.dnaW[i+30]
-
-        column2 = [
-            cell_6 + self.dnaB[6],
-            cell_7 + self.dnaB[7],
-            cell_8 + self.dnaB[8],
-            cell_9 + self.dnaB[9],
-            cell_10 + self.dnaB[10],
-            cell_11 + self.dnaB[11]
-        ]
-        #TODO LINE 3
-        for i in range(0,6):
-            cell_12 += column2[i] * self.dnaW[i+60]
-        for i in range(6,12):
-            cell_13 += column2[i-6] * self.dnaW[i+60]
-        for i in range(12,18):
-            cell_14 += column2[i-12] * self.dnaW[i+60]
-        for i in range(18,24):
-            cell_15 += column2[i-18] * self.dnaW[i+60]
-        for i in range(24,30):
-            cell_16 += column2[i-24] * self.dnaW[i+60]
-        for i in range(30,36):
-            cell_17 += column2[i-30] * self.dnaW[i+60]
-
-        column3 = [
-            cell_12 + self.dnaB[12],
-            cell_13 + self.dnaB[13],
-            cell_14 + self.dnaB[14],
-            cell_15 + self.dnaB[15],
-            cell_16 + self.dnaB[16],
-            cell_17 + self.dnaB[17]
-        ]
-        #TODO LINE 4
-        for i in range(0,6):
-            cell_18 += column3[i] * self.dnaW[i+90]
-        for i in range(6,12):
-            cell_19 += column3[i-6] * self.dnaW[i+90]
->>>>>>> origin/main
 
 
 
         column4 = [
-<<<<<<< HEAD
             (cell_19 + self.dnaB[18])*100,
             (cell_20 + self.dnaB[19])*100
-=======
-            (cell_18 + self.dnaB[18])*100,
-            (cell_19 + self.dnaB[19])*100
->>>>>>> origin/main
         ]
         #speed,angle
 #---------------------------------------------------------------------------------
@@ -323,28 +234,6 @@ class NN():
             self.rect.centerx += m.cos(m.radians(self.angle)) * self.speed
             self.rect.centery -= m.sin(m.radians(self.angle)) * self.speed
 
-<<<<<<< HEAD
-=======
-    def draw(self):
-        if not self.stop:
-            self.angle
-
-            # Rotate from the ORIGINAL image
-            
-            self.image = g.transform.rotate(
-                self.original_image,
-                self.angle
-            )
-            self.image.set_colorkey(c.WHITE)
-            # Keep the car in the same position
-            self.rect = self.image.get_rect(
-                center=self.rect.center
-            )
-
-            self.rect.centerx += m.cos(m.radians(self.angle)) * self.speed
-            self.rect.centery -= m.sin(m.radians(self.angle)) * self.speed
-
->>>>>>> origin/main
     def line(self):
         x = float(self.rect.centerx)
         y = float(self.rect.centery)
@@ -362,17 +251,11 @@ class NN():
 
             color = draha01.image.get_at((ix, iy))
 
-<<<<<<< HEAD
             if color == c.BLACK or color == c.DARK_GREEN:
                 distance_FW = dis
                 break
         if not distance_FW:
             distance_FW = dis
-=======
-            if color == c.BLACK:
-                distance_FW = dis
-                break
->>>>>>> origin/main
         if fl_lines:
             g.draw.line(
                 sc,
@@ -397,17 +280,11 @@ class NN():
 
             color = draha01.image.get_at((ix, iy))
 
-<<<<<<< HEAD
             if color == c.BLACK or color == c.DARK_GREEN:
                 distance_R = dis
                 break
         if not distance_R:
             distance_R = dis
-=======
-            if color == c.BLACK:
-                distance_R = dis
-                break
->>>>>>> origin/main
         if fl_lines:
             g.draw.line(
                 sc,
@@ -432,17 +309,11 @@ class NN():
 
             color = draha01.image.get_at((ix, iy))
 
-<<<<<<< HEAD
             if color == c.BLACK or color == c.DARK_GREEN:
                 distance_L = dis
                 break
         if not distance_L:
             distance_L = dis
-=======
-            if color == c.BLACK:
-                distance_L = dis
-                break
->>>>>>> origin/main
         if fl_lines:
             g.draw.line(
                 sc,
@@ -467,17 +338,11 @@ class NN():
 
             color = draha01.image.get_at((ix, iy))
 
-<<<<<<< HEAD
             if color == c.BLACK or color == c.DARK_GREEN:
                 distance_R45 = dis
                 break
         if not distance_R45:
             distance_R45 = dis
-=======
-            if color == c.BLACK:
-                distance_R45 = dis
-                break
->>>>>>> origin/main
         if fl_lines:
             g.draw.line(
                 sc,
@@ -502,17 +367,11 @@ class NN():
 
             color = draha01.image.get_at((ix, iy))
 
-<<<<<<< HEAD
             if color == c.BLACK or color == c.DARK_GREEN:
                 distance_L45 = dis
                 break
         if not distance_L45:
             distance_L45 = dis
-=======
-            if color == c.BLACK:
-                distance_L45 = dis
-                break
->>>>>>> origin/main
         if fl_lines:
             g.draw.line(
                 sc,
@@ -520,29 +379,16 @@ class NN():
                 self.rect.center,
                 (int(x), int(y))
             )
-<<<<<<< HEAD
 
         if not (distance_FW and distance_R and distance_L and distance_R45 and distance_L45):
             self.stop = True
         return [distance_FW,distance_R,distance_L,distance_R45,distance_L45]
 
-=======
-        return [distance_FW,distance_R,distance_L,distance_R45,distance_L45]
-
-    def check_wall(self):
-        x = self.rect.centerx
-        y = self.rect.centery
-        color = draha01.image.get_at((x, y))
-        if color == c.BLACK or color == c.DARK_GREEN:
-            self.stop = True
-
->>>>>>> origin/main
     def add_fitness(self,fit):
         if self.rect.colliderect(fit):
             if not fit in self.fitnesses:
                 self.fitnesses.append(fit)
                 self.fitness += 1 
-<<<<<<< HEAD
 
     def mutate(self):
         already_mutated_index_W = []
@@ -563,8 +409,6 @@ class NN():
             already_mutated_index_B.append(chosen_index)
             self.dnaB[chosen_index] += round(r.uniform(-bias_mutation_range,bias_mutation_range),2)
 
-=======
->>>>>>> origin/main
 auta = []
 
 for _ in range(count):
@@ -572,10 +416,6 @@ for _ in range(count):
 
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
 clock = g.time.Clock()
 
 
@@ -585,7 +425,6 @@ FPS = 60
 
 print("curent gen: " + str(gen_count))
 
-<<<<<<< HEAD
 
 background = g.Surface((SCW, SCH))
 background.fill(c.LIGHT_BROWN)
@@ -594,8 +433,6 @@ for element in meters:
 background.blit(draha01.image, draha01.rect)
 
 
-=======
->>>>>>> origin/main
 while 1:
     for event in g.event.get():
         if event.type == g.KEYDOWN:
@@ -607,26 +444,15 @@ while 1:
                 for auto in auta:
                     if auto.fitness > heighest_fitness:
                         heighest_fitness = auto.fitness
-<<<<<<< HEAD
-=======
-                        
->>>>>>> origin/main
                         heighest_fitness_index = auta.index(auto)
 
                 print(heighest_fitness)
                 best_dnaW = auta[heighest_fitness_index].dnaW
                 best_dnaB = auta[heighest_fitness_index].dnaB
-<<<<<<< HEAD
-=======
-
-                print(best_dnaW)
-                print(best_dnaB)
->>>>>>> origin/main
                 copy_auta = auta.copy()
                 for i in copy_auta:
                     if i.fitness != heighest_fitness:
                         auta.remove(i)
-<<<<<<< HEAD
                 auta.clear()
                 copy_auta.clear()
                 for _ in range(count):
@@ -638,12 +464,6 @@ while 1:
 
     '''
             if event.key == g.K_w:
-=======
-
-            if event.key == g.K_w:
-                for el in auta:
-                    print(el.fitness)
->>>>>>> origin/main
                 fl_forward = True
             if event.key == g.K_d:
                 fl_right = True
@@ -651,10 +471,6 @@ while 1:
                 fl_left = True
             if event.key == g.K_s:
                 fl_left = True
-<<<<<<< HEAD
-=======
-
->>>>>>> origin/main
         if event.type == g.KEYUP:
             if event.key == g.K_w:
                 fl_forward = False
@@ -664,43 +480,16 @@ while 1:
                 fl_left = False
             if event.key == g.K_s:
                 fl_left = False
-<<<<<<< HEAD
     '''
 
 #----------------------------------------------------------------------
     sc.blit(background,(0,0))
-=======
-
-    #### 
-
-    sc.fill(c.LIGHT_BROWN)
-
-    for element in meters:
-        sc.blit(element.image,element.rect)
-    sc.blit(draha01.image,draha01.rect)
-    #da
-    if fl_forward:
-        angle = 10
-    if fl_left:
-        angle = -10
-
->>>>>>> origin/main
     for element in auta:
         sc.blit(element.image,element.rect)
         inputs = element.line()
         element.predict(inputs)
-<<<<<<< HEAD
 
         for element2 in meters:
             element.add_fitness(element2)
-=======
-        element.check_wall()
-        for element2 in meters:
-            element.add_fitness(element2)
-
-    d_angle = 0
-    
-
->>>>>>> origin/main
     g.display.update()
     clock.tick(FPS)
