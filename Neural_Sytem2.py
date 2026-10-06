@@ -1,5 +1,5 @@
 import random as r
-class NS(): # creates empty NS in list form
+class NN(): # creates empty Neural Network in list format
     def __init__(self,input_neuron_count,hidden_layer_column_count,hidden_layer_neuron_count,output_neuron_count):
         self.INC = input_neuron_count
         self.HLCC = hidden_layer_column_count
@@ -16,7 +16,7 @@ class NS(): # creates empty NS in list form
             self.biases.append([])
 
 
-    def generate_random_dna(self,weight_range,round_range,bias_range): 
+    def generate_random_dna(self,weight_range,bias_range,round_range): 
         # generates random weight values
         for _ in range(self.INC*self.HLNC): # input to first hidden
             self.weights[0].append(round(r.uniform(-weight_range,weight_range),round_range))
@@ -94,10 +94,29 @@ class NS(): # creates empty NS in list form
         self.weights = [layer.copy() for layer in new_dna[0]]
         self.biases = [layer.copy() for layer in new_dna[1]]
 
+    def mutate(self,min_weight_mutation,max_weight_mutation,weight_mutation_range,min_bias_mutation,max_bias_mutation,bias_mutation_range,round_range):
+        already_mutated_index_W = []
+        for _ in range(self.HLCC+1):
+            already_mutated_index_W.append([])
+
+        already_mutated_index_B = []
+        for _ in range(self.HLCC+1):
+            already_mutated_index_B.append([])
+        
+        for _ in range(r.randint(min_weight_mutation,max_weight_mutation)):
+            chosen_column = r.randint(0,self.HLCC) # choses which column to mutate
+            chosen_index = r.randint(0,len(self.weights[chosen_column])-1) # choses which cell to mutate
+            while chosen_index in already_mutated_index_W[chosen_column]:
+                chosen_index = r.randint(0,len(self.weights[chosen_column])-1)
+            already_mutated_index_W[chosen_column].append(chosen_index)
+            self.weights[chosen_column][chosen_index] += round(r.uniform(-weight_mutation_range,weight_mutation_range),round_range)
 
 
+        for _ in range(r.randint(min_bias_mutation,max_bias_mutation)):
+            chosen_column = r.randint(0,self.HLCC)
+            chosen_index = r.randint(0,len(self.biases[chosen_column])-1)
+            while chosen_index in already_mutated_index_B[chosen_column]:
+                chosen_index = r.randint(0,len(self.biases[chosen_column])-1)
+            already_mutated_index_B[chosen_column].append(chosen_index)
+            self.biases[chosen_column][chosen_index] += round(r.uniform(-bias_mutation_range,bias_mutation_range),round_range)
 
-ns = NS(2,3,3,2)
-ns.generate_random_dna(1,1)
-print(ns.predict([2,3]))
-print(ns.get_dna())
