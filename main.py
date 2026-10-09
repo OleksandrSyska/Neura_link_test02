@@ -10,6 +10,7 @@ from Car import Car
 from Eyes import Eyes
 from Fitness_Meter import Fitness_meter
 from Fitness_Cotroler import FC
+from Button import Button
 
 g.init()
 SCW = 1900
@@ -61,7 +62,8 @@ sc = g.display.set_mode((SCW, SCH))
 images = {
     "BG" : g.image.load(f'src\\draha02.png').convert_alpha(),
     "Fitness meter" : g.image.load(f'src\\Fitness_meter.png').convert_alpha(),
-    "car" : g.image.load(f'src\\auto01.png').convert_alpha()
+    "car" : g.image.load(f'src\\auto01.png').convert_alpha(),
+    "gen button" : g.image.load(f'src\\Gen_button.png').convert_alpha()
 }
 meters = [
     Fitness_meter(images["Fitness meter"],(65, 434),90),
@@ -82,6 +84,7 @@ meters = [
 
 bg = BG(images["BG"],c.LIGHT_BROWN,SCW,SCH,meters)
 eyes = Eyes()
+gen_button = Button(images["gen button"])
 cars = []
 
 for _ in range(count):
@@ -96,6 +99,9 @@ def start_with_random_dna():
 def input_dna():
     pass
 
+
+def new_gen():
+    print("NEW GEN!!")
 clock = g.time.Clock()
 FPS = 60
 
@@ -103,6 +109,12 @@ print("curent gen: " + str(gen_count))
 start_with_random_dna()
 while 1:
     for event in g.event.get():
+        if event.type == g.KEYDOWN:
+            if event.key == g.K_ESCAPE:
+                exit()
+        if event.type == g.MOUSEBUTTONDOWN:
+            if gen_button.Fl_clicked(g.mouse.get_pos()):
+                new_gen()
         '''
         if event.type == mutation_clock:
             gen_count +=1
@@ -123,9 +135,7 @@ while 1:
 
             for auto in cars:
                 auto.mutate()
-        if event.type == g.KEYDOWN:
-            if event.key == g.K_ESCAPE:
-                exit()
+        
             if event.key == g.K_SPACE:
                 g.time.set_timer(mutation_clock,0)
                 copy_auta = cars.copy()
@@ -180,6 +190,7 @@ while 1:
 
 #----------------------------------------------------------------------
     sc.blit(bg.draw(),(0,0)) # draw BG
+    sc.blit(gen_button.get_image(), gen_button.get_rect())
     for car_index in range(len(cars)): # draw cars
         
         inputs = eyes.lines(
@@ -195,7 +206,14 @@ while 1:
         if not inputs:
             cars[car_index].stop()
         else:
-            cars[car_index].move(cars[car_index].NN.predict(inputs))
+            for input_index in range(len(inputs)):
+                inputs[input_index] = inputs[input_index] //100
+            outputs = cars[car_index].NN.predict(inputs)
+
+            for output_index in range(len(outputs)):
+                outputs[output_index] = outputs[output_index]*100
+            
+            cars[car_index].move(outputs)
 
         #for element2 in meters:
         #    cars[car_index].add_fitness(element2)

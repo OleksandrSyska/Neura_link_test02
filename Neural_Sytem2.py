@@ -119,4 +119,3 @@ class NN(): # creates empty Neural Network in list format
                 chosen_index = r.randint(0,len(self.biases[chosen_column])-1)
             already_mutated_index_B[chosen_column].append(chosen_index)
             self.biases[chosen_column][chosen_index] += round(r.uniform(-bias_mutation_range,bias_mutation_range),round_range)
-
