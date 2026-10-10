@@ -1,6 +1,6 @@
-from Math_Logic import Math_Logic as m
+from classes.Math_Logic import Math_Logic as m
 from pygame import draw as D
-import colors as c
+import classes.colors as c
 
 class Eyes():
     def lines(self,center_x,center_y,angle,bg,screen,creen_sizes,fl_draw_lines):

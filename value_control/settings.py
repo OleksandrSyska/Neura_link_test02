@@ -1,3 +1,5 @@
+SCW = 1900
+SCH = 1000
 fl_lines = 0
 speed_multiplier = 1.2
 stop_multiplier = 0.5
@@ -8,6 +10,8 @@ weight_range = 0.12
 bias_range = 0.12
 weight_mutation_range = 0.2#0.15
 bias_mutation_range = 0.2#0.15
-
-max_wieght_mutation = 10 #72 # half
-max_bias_mutation = 5 # half 
+min_weight_mutation = 5
+max_weight_mutation = 20 #72 # half
+min_bias_mutation = 5
+max_bias_mutation = 10 # half 
+round_range = 2

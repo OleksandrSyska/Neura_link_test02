@@ -1,8 +1,8 @@
-from colors import WHITE
-from Math_Logic import Math_Logic as m
+from classes.colors import WHITE
+from classes.Math_Logic import Math_Logic as m
 from pygame import transform as T
 class Car():
-    def __init__(self,image,speed_max,angle_max,NN):
+    def __init__(self,image,speed_max,angle_max,NN,fitness_controller):
         self.original_image = image 
         self.original_image.set_colorkey(WHITE)
         self.image = self.original_image
@@ -14,6 +14,7 @@ class Car():
         self.speed_max = speed_max
         self.angle_max = angle_max
         self.NN = NN
+        self.fit_con = fitness_controller
         
     def move(self,data):
         speed = data[0]
@@ -46,5 +47,9 @@ class Car():
         return self.image
     def get_rect(self):
         return self.rect
+    def reset(self):
+        self.rect.center = (202, 490)
+        self.angle = 90
+        self.fl_stop = False
     def stop(self):
         self.fl_stop = True

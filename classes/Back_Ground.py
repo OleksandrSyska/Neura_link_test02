@@ -1,4 +1,4 @@
-from colors import WHITE
+from classes.colors import WHITE
 from pygame import Surface as SURF
 class BG():
     def __init__(self,image,BG_color,SCW,SCH,meters):
