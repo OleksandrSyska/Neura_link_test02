@@ -77,6 +77,7 @@ class NN(): # creates empty Neural Network in list format
                 next_cells.append(curent_cell)
             #
             curent_cells = next_cells.copy()
+            next_cells.clear()
             curent_weight = 0
 
         # last hidden to output
@@ -95,6 +96,7 @@ class NN(): # creates empty Neural Network in list format
         self.biases = [layer.copy() for layer in new_dna[1]]
 
     def mutate(self,min_weight_mutation,max_weight_mutation,weight_mutation_range,min_bias_mutation,max_bias_mutation,bias_mutation_range,round_range):
+        #TODO 1*
         already_mutated_index_W = []
         for _ in range(self.HLCC+1):
             already_mutated_index_W.append([])

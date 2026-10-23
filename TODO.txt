@@ -1,0 +1,10 @@
+1*:
+Bug in mutate(): infinite loops are possible
+If the mutation count exceeds the number of available weights in a layer, this loop can run forever.
+For example, if a layer has 15 weights and your mutation process tries to mutate all 15, it can work. But if it tries to mutate 16 weights in that same layer, it will never find another unique index.
+2*:
+Bug in new_gen(): the best DNA is mutated too
+#best_dna = cars[heighest_fitness_index].NN.get_dna()
+#start_with_dna(best_dna)
+3:
+Your network currently has no activation function

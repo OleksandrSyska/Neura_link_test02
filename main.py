@@ -2,7 +2,6 @@
 import classes.colors as c
 import pygame as g
 import random as r
-import math as m
 # import files
 from classes.Neural_Sytem2 import NN
 from classes.Back_Ground import BG
@@ -34,6 +33,7 @@ def new_gen():
     global gen_count
     gen_count += 1
     print("curent gen: " + str(gen_count))
+    #TODO 2*
     heighest_fitness = 0
     heighest_fitness_index = 0
     for car in cars:
@@ -42,7 +42,6 @@ def new_gen():
         if car.fit_con.get_fitness() > heighest_fitness:
             heighest_fitness = car.fit_con.get_fitness()
             heighest_fitness_index = cars.index(car)
-
 
     best_dna = cars[heighest_fitness_index].NN.get_dna()
     start_with_dna(best_dna)
