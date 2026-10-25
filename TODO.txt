@@ -1,10 +1,104 @@
 1*:
-Bug in mutate(): infinite loops are possible
-If the mutation count exceeds the number of available weights in a layer, this loop can run forever.
-For example, if a layer has 15 weights and your mutation process tries to mutate all 15, it can work. But if it tries to mutate 16 weights in that same layer, it will never find another unique index.
-2*:
-Bug in new_gen(): the best DNA is mutated too
-#best_dna = cars[heighest_fitness_index].NN.get_dna()
-#start_with_dna(best_dna)
+Bug in mutate(): infinite loops are possible if it randomly choses the same column, INEFICIENT
+2:
+code CLEANUP
 3:
-Your network currently has no activation function
+start with random wont work second time
+4*:
+activation func, needs fixing
+5:
+doporuceni
+0 <= min_weight_mutation <= max_weight_mutation <= self.WC
+6:
+Chybí kontrola správného tvaru DNA
+metoda předpokládá, že DNA vždy odpovídá architektuře dané sítě. Pokud omylem předáš DNA z jiné neuronové sítě, chyba se může projevit až při predict() nebo mutate().
+7:
+Chyby ve třídě Car
+Po resetu se neobnoví rychlost\
+8:
+Kontrola úhlu omezuje změnu, nikoliv celkový úhel
+9:
+Největší problémy v genetickém algoritmu
+🔴 Chyba č. 10: Seznam dostupných vah se po mutaci neaktualizuje
+Tohle je další důležitá chyba v NN.mutate().
+
+Po výběru váhy provedeš:
+chosen_index = r.choice(available_indexes)self.weights[chosen_column][chosen_index] += round(    r.uniform(-weight_mutation_range, weight_mutation_range),    round_range)already_mutated_index_W[chosen_column].append(chosen_index)
+
+
+
+Přidáš index do already_mutated_index_W, ale neodebereš ho z available_indexes.
+
+Navíc se seznam znovu sestavuje pouze tehdy, když je prázdný:
+while not available_indexes:
+
+
+
+Po první úspěšné volbě tedy můžeš stejnou pozici vybrat opakovaně. To je v rozporu s komentářem, že chceš mutovat různé indexy.
+Doporučená oprava mutací
+Místo složitého náhodného vybírání vrstev sestav seznam všech pozic a náhodně vyber unikátní pozice. Tohle můžeš použít pro váhy:
+weight_positions = [    (layer_index, weight_index)    for layer_index, layer in enumerate(self.weights)    for weight_index in range(len(layer))]mutation_count = r.randint(    min_weight_mutation,    max_weight_mutation)for layer_index, weight_index in r.sample(    weight_positions, mutation_count):    self.weights[layer_index][weight_index] += round(        r.uniform(            -weight_mutation_range,            weight_mutation_range        ),        round_range    )
+
+
+
+Stejný princip použij pro self.biases s min_bias_mutation a max_bias_mutation.
+
+Výhody:
+- žádná nekonečná smyčka při vybírání vrstev;
+- každá pozice je vybrána nejvýše jednou za danou mutaci;
+- mutace se rozdělují mezi vrstvy přirozeně podle počtu vah;
+- nepotřebuješ pomocné seznamy already_mutated_index_W a already_mutated_index_B.
+Tento postup předpokládá, že rozsahy mutací jsou platné a počet požadovaných mutací nepřekračuje počet dostupných pozic.
+10:
+Ztrácíš nejlepšího jedince každé generace
+Ve funkci new_gen() vezmeš nejlepší DNA, přiřadíš ji všem autům a následně zmutuješ úplně všechna:
+for car in cars:    car.reset()    car.fit_con.reset()    car.NN.mutate(...)
+
+
+
+To znamená, že ani nejlepší jedinec nezůstane zachován beze změny.
+
+Představ si, že generace 10 má fitness 12 a generace 11 má nejlepší fitness jen 7. Evoluce se mohla zlepšit v některých směrech, ale tvůj algoritmus nemá žádnou záruku, že nejlepší nalezené řešení uchová.
+
+Řešení: elitismus. Jedno nebo několik nejlepších aut přenášej do nové generace bez mutace. Ostatní potomky vytvářej mutacemi nebo křížením. Při kopírování DNA nezapomeň na samostatné kopie seznamů, což už správně řešíš v get_dna() a input_dna().
+11: Nejlepší jedinec se vybírá jen podle fitness, ale neřešíš shody
+Tvoje podmínka:
+if car.fit_con.get_fitness() == heighest_fitness:    pass
+
+
+
+nic nedělá. Pokud má několik aut stejnou fitness, automaticky zůstane vybráno první auto s nejvyšší dosaženou hodnotou.
+
+To není programátorská chyba, pokud je to záměr, ale při velkém počtu shod může evoluce zbytečně ztrácet rozmanitost. Můžeš například vybrat náhodně mezi všemi nejlepšími jedinci, případně použít turnajový výběr nebo křížení.
+11:
+Po zastavení auta se už nevyhodnocuje jeho pohyb
+V hlavní smyčce:
+if not inputs:    cars[car_index].stop()else:    outputs = cars[car_index].NN.predict(inputs)    cars[car_index].move(outputs)
+
+
+
+Jakmile Eyes.lines() vrátí prázdný výsledek, auto se zastaví. Pokud se potom opět objeví platné vstupy, zavoláš move(), ale metoda Car.move() má:
+if not self.fl_stop:
+
+
+
+Takže auto zůstane stát až do resetu.
+
+To je správné, pokud prázdné vstupy znamenají havárii nebo konec jízdy. Pokud ale prázdné vstupy mohou vzniknout jen dočasně, auto se může zastavit zbytečně.
+
+Doporučuji ověřit, co přesně Eyes.lines() vrací, když auto vyjede z tratě nebo se ocitne u okraje obrazovky.
+12:
+Fitness se aktualizuje jen tehdy, když existují vstupy
+Kontrolu checkpointů máš uvnitř větve else. Když inputs neexistují, auto se zastaví a checkpointy už se v daném snímku nekontrolují.
+
+To většinou není zásadní problém, ale pokud se auto zastaví těsně nad checkpointem a kolize ještě nebyla vyhodnocena, může přijít o bod. Jestli chceš měřit fitness podle projetých checkpointů, zvaž oddělení detekce kolizí od vyhodnocení neuronové sítě.
+13:
+FC.reset() nemaže used_meters	Kritická	Vyčistit seznam checkpointů
+Mutace může vybrat stejnou váhu opakovaně	Vysoká	Použít random.sample()
+Mutace může uvíznout v nekonečné smyčce	Vysoká	Vybírat z globálního seznamu pozic
+Nejlepší jedinec se vždy mutuje	Vysoká	Zavést elitismus
+Car.reset() neobnovuje rychlost	Vysoká	Nastavit počáteční rychlost
+generate_random_dna() přidává hodnoty	Střední	Před generováním vyčistit seznamy
+Výstupy sítě nejsou omezené	Střední	Zvážit tanh() nebo vlastní limity
+Výběr nejlepšího jedince neřeší shody	Nízká	Vybrat náhodně z nejlepších
+set_timer(..., 0) časovač vypne	Nízká	Nastavit interval, pokud ho potřebuješ

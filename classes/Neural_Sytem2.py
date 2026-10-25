@@ -1,11 +1,21 @@
 import random as r
+# range(0,1) -> 0
+# randint(0,1) -> 0/1
+# UPDATE: added biases + fixed mutation
 class NN(): # creates empty Neural Network in list format
     def __init__(self,input_neuron_count,hidden_layer_column_count,hidden_layer_neuron_count,output_neuron_count):
+        if hidden_layer_column_count <= 0:
+            raise ValueError(
+                f'Minimal value for "hidden_layer_column_count" is 1, but {hidden_layer_column_count} was given.'
+            )
         self.INC = input_neuron_count
         self.HLCC = hidden_layer_column_count
         self.HLGC = hidden_layer_column_count -1 # hidden layer gap count
         self.HLNC = hidden_layer_neuron_count
         self.ONC = output_neuron_count
+        
+        self.WC = self.INC * self.HLNC + self.HLGC*self.HLNC*self.HLNC + self.HLNC*self.ONC
+        self.BC = self.HLCC * self.HLNC + self.ONC
 
         self.weights = []
         self.biases = []
@@ -38,7 +48,10 @@ class NN(): # creates empty Neural Network in list format
             
     
     def get_dna(self): # returns dna
-        return [self.weights,self.biases]
+        return [
+        [layer.copy() for layer in self.weights],
+        [layer.copy() for layer in self.biases]
+        ]
     
     def predict(self,inputs): # predicts and returns output
         if len(inputs) != self.INC:
@@ -96,28 +109,55 @@ class NN(): # creates empty Neural Network in list format
         self.biases = [layer.copy() for layer in new_dna[1]]
 
     def mutate(self,min_weight_mutation,max_weight_mutation,weight_mutation_range,min_bias_mutation,max_bias_mutation,bias_mutation_range,round_range):
-        #TODO 1*
         already_mutated_index_W = []
+        
         for _ in range(self.HLCC+1):
             already_mutated_index_W.append([])
 
         already_mutated_index_B = []
         for _ in range(self.HLCC+1):
             already_mutated_index_B.append([])
-        
-        for _ in range(r.randint(min_weight_mutation,max_weight_mutation)):
-            chosen_column = r.randint(0,self.HLCC) # choses which column to mutate
-            chosen_index = r.randint(0,len(self.weights[chosen_column])-1) # choses which cell to mutate
-            while chosen_index in already_mutated_index_W[chosen_column]:
-                chosen_index = r.randint(0,len(self.weights[chosen_column])-1)
-            already_mutated_index_W[chosen_column].append(chosen_index)
+        # MUTATION OF WEIGHTS
+        if min_weight_mutation < 0:
+            raise ValueError(
+                '"min_weight_mutation" cant less than 0.'
+            )
+        if max_weight_mutation > self.WC:
+            raise ValueError(
+                f'"max_weight_mutation" cant excede nor be equel to amount of weights, which is {self.WC}.'
+            )
+        #TODO 1*
+        available_indexes = []
+        for _ in range(r.randint(min_weight_mutation,max_weight_mutation)): # choses between min and max amount to mutate
+            while not available_indexes:
+                available_indexes = [] # list to determine unused indexes in chosen column 
+                chosen_column = r.randint(0,self.HLCC) # choses which column to mutate
+                for index in range(len(self.weights[chosen_column])): # determine unused indexes in chosen column 
+                    if index not in already_mutated_index_W[chosen_column]:
+                        available_indexes.append(index)
+            chosen_index = r.choice(available_indexes)
             self.weights[chosen_column][chosen_index] += round(r.uniform(-weight_mutation_range,weight_mutation_range),round_range)
-
-
+            already_mutated_index_W[chosen_column].append(chosen_index)
+        
+        # MUTATION OF BIASES
+        if min_bias_mutation < 0:
+            raise ValueError(
+                '"min_bias_mutation" cant less than 0.'
+            )
+        
+        if max_bias_mutation > self.BC:
+            raise ValueError(
+                f'"max_bias_mutation" cant excede nor be equel to amount of weights, which is {self.BC}.'
+            )
+        
+        available_indexes = []
         for _ in range(r.randint(min_bias_mutation,max_bias_mutation)):
-            chosen_column = r.randint(0,self.HLCC)
-            chosen_index = r.randint(0,len(self.biases[chosen_column])-1)
-            while chosen_index in already_mutated_index_B[chosen_column]:
-                chosen_index = r.randint(0,len(self.biases[chosen_column])-1)
-            already_mutated_index_B[chosen_column].append(chosen_index)
+            while not available_indexes:
+                available_indexes = [] # list to determine unused indexes in chosen column 
+                chosen_column = r.randint(0,self.HLCC) # choses which column to mutate
+                for index in range(len(self.biases[chosen_column])): # determine unused indexes in chosen column 
+                    if index not in already_mutated_index_B[chosen_column]:
+                        available_indexes.append(index)
+            chosen_index = r.choice(available_indexes)
             self.biases[chosen_column][chosen_index] += round(r.uniform(-bias_mutation_range,bias_mutation_range),round_range)
+            already_mutated_index_B[chosen_column].append(chosen_index)
