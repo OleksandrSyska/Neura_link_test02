@@ -31,39 +31,45 @@ def start_with_dna(dna):
 
 def new_gen():
     global gen_count
+    if not cars:
+        return
     gen_count += 1
-    print("curent gen: " + str(gen_count))
+    print(f"Current generation: {gen_count}")
     heighest_fitness = 0
     heighest_fitness_index = 0
     for car in cars:
         if car.fit_con.get_fitness() == heighest_fitness:
-            pass # CROSS MUTATION !!!! WIP
+            # CROSS MUTATION !!!! WIP
+            heighest_fitness = car.fit_con.get_fitness()
+            heighest_fitness_index = cars.index(car)
         if car.fit_con.get_fitness() > heighest_fitness:
             heighest_fitness = car.fit_con.get_fitness()
             heighest_fitness_index = cars.index(car)
 
     best_dna = cars[heighest_fitness_index].NN.get_dna()
+    print(f"Best fitnes {heighest_fitness}")
     start_with_dna(best_dna)
 
     for car in cars:
         car.reset()
         car.fit_con.reset()
-        car.NN.mutate(
-            SET.min_weight_mutation,
-            SET.max_weight_mutation,
-            SET.weight_mutation_range,
-            SET.min_bias_mutation,
-            SET.max_bias_mutation,
-            SET.bias_mutation_range,
-            SET.round_range
-        )
+        if cars.index(car) != heighest_fitness_index:
+            car.NN.mutate(
+                SET.min_weight_mutation,
+                SET.max_weight_mutation,
+                SET.weight_mutation_range,
+                SET.min_bias_mutation,
+                SET.max_bias_mutation,
+                SET.bias_mutation_range,
+                SET.round_range
+            )
 
 # pygame init
 g.init()
 sc = g.display.set_mode((SET.SCW, SET.SCH)) # init. display
 
 mutation_clock = g.USEREVENT + 1
-g.time.set_timer(mutation_clock,0000) # mutation deelay
+g.time.set_timer(mutation_clock,0) # mutation delay
 images = {
     "BG" : g.image.load(f'src\\draha01.png').convert_alpha(),
     "Fitness meter" : g.image.load(f'src\\Fitness_meter.png').convert_alpha(),
@@ -81,8 +87,9 @@ meters = [
     Fitness_meter(images["Fitness meter"],(65, 434),90),
     Fitness_meter(images["Fitness meter"],(90, 300),90),
     Fitness_meter(images["Fitness meter"],(396, 71),0),
-    Fitness_meter(images["Fitness meter"],(500, 250),0),
+    Fitness_meter(images["Fitness meter"],(500, 500),0),
     Fitness_meter(images["Fitness meter"],(575, 550),0),
+    Fitness_meter(images["Fitness meter"],(600, 550),0),
     Fitness_meter(images["Fitness meter"],(644, 303),0),
     Fitness_meter(images["Fitness meter"],(755, 377),0),
     Fitness_meter(images["Fitness meter"],(800, 377),0),
@@ -128,9 +135,9 @@ while 1:
 #----------------------------------------------------------------------
     sc.blit(bg.draw(),(0,0)) # draw BG
     sc.blit(gen_button.get_image(), gen_button.get_rect())
-    for car_index in range(len(cars)): # draw cars
-        
-        inputs = eyes.lines(
+    for car_index in range(len(cars)): # moves and draw cars
+        if not cars[car_index].get_status(): # checks if car has stopped
+            inputs = eyes.lines( # gets distances
                 cars[car_index].get_rect().centerx,
                 cars[car_index].get_rect().centery,
                 cars[car_index].angle,
@@ -139,26 +146,31 @@ while 1:
                 (SET.SCW,SET.SCH),
                 SET.fl_lines
                 )
+            if not inputs: # stops car if distances were 0 => crashed
+                cars[car_index].stop()
+                for meter in meters:
+                    if meter not in cars[car_index].fit_con.get_used_meters():
+                        if meter.collide_check(cars[car_index].get_rect()):
+                            cars[car_index].fit_con.add_used_meter(meter)
+                            cars[car_index].fit_con.add_fitness()
+            else: # predicts and moves car
+                for input_index in range(len(inputs)): # edit raw data to be smaller
+                    inputs[input_index] = inputs[input_index] /100
+                outputs = cars[car_index].NN.predict(inputs)
+        
+                for output_index in range(len(outputs)): # edit calculated data
+    
+                    #outputs[output_index] = outputs[output_index]*7 # FIXME 4*
+                    outputs[0] *= 7  # Speed change
+                    outputs[1] *= 3  # Angle change 
+                
+                cars[car_index].move(outputs)
+                for meter in meters:
+                    if meter not in cars[car_index].fit_con.get_used_meters():
+                        if meter.collide_check(cars[car_index].get_rect()):
+                            cars[car_index].fit_con.add_used_meter(meter)
+                            cars[car_index].fit_con.add_fitness()
 
-        if not inputs:
-            cars[car_index].stop()
-        else:
-            for input_index in range(len(inputs)): # edit raw data to be smaller
-                inputs[input_index] = inputs[input_index] //100
-            outputs = cars[car_index].NN.predict(inputs)
-
-            for output_index in range(len(outputs)): # edit calculated data
-
-                outputs[output_index] = outputs[output_index]*7 # FIXME 4*
-            
-            cars[car_index].move(outputs)
-            for meter in meters:
-                if meter not in cars[car_index].fit_con.get_used_meters():
-                    if meter.collide_check(cars[car_index].get_rect()):
-                        cars[car_index].fit_con.add_used_meter(meter)
-                        cars[car_index].fit_con.add_fitness()
-
-            
 
         #for element2 in meters:
         #    cars[car_index].add_fitness(element2)

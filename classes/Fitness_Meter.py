@@ -4,6 +4,7 @@ class Fitness_meter():
         self.original_image = image 
         self.image = self.original_image
         self.image = t.rotate(self.image,rotation)
+        self.image.fill((0,255,100))
         self.rect = self.image.get_rect()
         self.rect.center = cordinates
     def collide_check(self,car_rect):

@@ -20,15 +20,19 @@ class Car():
         speed = data[0]
         angle = data[1]
         if not self.fl_stop:
-            if not self.speed + speed > 0:
+            self.speed = max(0, min(self.speed + speed, self.speed_max))
+            '''if not self.speed + speed > 0:
                 self.speed = 0
             elif not self.speed + speed <self.speed_max:
                 self.speed = self.speed_max
             else:
                 self.speed += speed
-
+            '''
+            self.angle = (self.angle + angle) % 360
+            '''
             if -self.angle_max < angle < self.angle_max:
                 self.angle += angle
+            '''
             # Rotate from the ORIGINAL image
             self.image = T.rotate(
                 self.original_image,
@@ -49,7 +53,13 @@ class Car():
         return self.rect
     def reset(self):
         self.rect.center = (202, 490)
+        self.image = self.original_image
+        self.image.set_colorkey(WHITE)
+        self.rect = self.image.get_rect(center=self.rect.center)
         self.angle = 90
+        self.speed = 1
         self.fl_stop = False
     def stop(self):
         self.fl_stop = True
+    def get_status(self):
+        return self.fl_stop
