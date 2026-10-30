@@ -15,3 +15,4 @@ max_weight_mutation = 20 #72 # half
 min_bias_mutation = 5
 max_bias_mutation = 10 # half 
 round_range = 2
+auto_gen_time = 5000

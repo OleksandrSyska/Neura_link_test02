@@ -9,7 +9,9 @@ from classes.Car import Car
 from classes.Eyes import Eyes
 from classes.Fitness_Meter import Fitness_meter
 from classes.Fitness_Cotroler import FC
-from classes.Button import Button
+#from classes.Button import Button
+from classes.Button import button
+from classes.Changeble_button import C_Button
 import value_control.settings as SET
 # Constants
 FPS = 60
@@ -101,7 +103,8 @@ meters = [
     Fitness_meter(images["Fitness meter"],(65, 600),90),
 ]
 eyes = Eyes()
-gen_button = Button(images["gen button"])
+gen_button = button((SET.SCW,0),"NEW GEN")
+auto_gen_swicht = C_Button((SET.SCW,200),["AUTO GEN: OFF","AUTO GEN: ON"])
 bg = BG(images["BG"],c.LIGHT_BROWN,SET.SCW,SET.SCH,meters)
 for _ in range(SET.count): # create cars
     cars.append(
@@ -125,16 +128,23 @@ while 1:
             if event.key == g.K_ESCAPE:
                 exit()
         if event.type == g.MOUSEBUTTONDOWN:
-            if gen_button.Fl_clicked(g.mouse.get_pos()):
+            mouse_pos = g.mouse.get_pos()
+            if gen_button.Fl_clicked(mouse_pos):
                 new_gen()
-        '''
-        if event.type == mutation_clock:
-            
-        '''
+            if auto_gen_swicht.Fl_clicked(mouse_pos):
+                if auto_gen_swicht.get_state():
+                    g.time.set_timer(mutation_clock,SET.auto_gen_time)
+                else:
+                    g.time.set_timer(mutation_clock,0)
 
+        
+        if event.type == mutation_clock:
+            new_gen()
 #----------------------------------------------------------------------
     sc.blit(bg.draw(),(0,0)) # draw BG
-    sc.blit(gen_button.get_image(), gen_button.get_rect())
+    #sc.blit(gen_button.get_image(), gen_button.get_rect())
+    gen_button.draw(sc)
+    auto_gen_swicht.draw(sc)
     for car_index in range(len(cars)): # moves and draw cars
         if not cars[car_index].get_status(): # checks if car has stopped
             inputs = eyes.lines( # gets distances
