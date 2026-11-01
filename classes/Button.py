@@ -1,51 +1,43 @@
 import pygame as g
-class button():
-    def __init__(self,screen_center_position,text):
-        self.text = text
-        self.screen_center_position = screen_center_position
+class Button():
+    def __init__(self,on_screen_position,titles,changable):
+        self.CHANGABLE = changable
+        self.titles = titles
+        self.title = self.titles[0]
+        self.state = 0
+        self.padding = 20
         text_size = 36
+        self.on_screen_position = on_screen_position
         self.font = g.font.SysFont("Roboto",text_size)
-        textW,textH = self.font.size(self.text)
-        padding = 20
-        width = textW + padding*2 
-        height = textH + padding*2
-        self.rect_center_position = (self.screen_center_position[0] - width, self.screen_center_position[1])
+        textW,textH = self.font.size(self.title)
+        width = textW + self.padding*2 
+        height = textH + self.padding*2
+        self.rect_position = (self.on_screen_position[0] - width, self.on_screen_position[1])
 
         self.surface = g.Surface((width,height))
         self.surface.fill((50,50,50))
         self.button_rect = g.Rect(
-            self.rect_center_position[0],
-            self.rect_center_position[1],
+            self.rect_position[0],
+            self.rect_position[1],
             width,
             height
         )
-        self.surface.blit(self.font.render(self.text,1,(255,255,255)),(padding,padding))
-
-    def Fl_clicked(self,mouse_pos):
-        if self.button_rect.collidepoint(mouse_pos):
-            return True
-        else:
-            return False
+        self.surface.blit(self.font.render(self.title,1,(255,255,255)),(self.padding,self.padding))
 
     def draw(self,sc):
-        sc.blit(self.surface,self.rect_center_position)
-    '''
-    def change_text(self,text):
-        self.text = text
-        text_size = 36
-        self.font = g.font.SysFont("Roboto",text_size)
-    '''
+        sc.blit(self.surface,self.rect_position)
+
+    def get_state(self):
+        return self.state
+
     def change_text(self, text):
-        self.text = text
+        self.title = text
+        textW, textH = self.font.size(self.title)
 
-        padding = 20
-        textW, textH = self.font.size(self.text)
+        width = textW + self.padding * 2
+        height = textH + self.padding * 2
 
-        width = textW + padding * 2
-        height = textH + padding * 2
-
-        # Zachováme původní pozici tlačítka
-        old_center = self.rect_center_position
+        old_center = self.rect_position
 
         self.surface = g.Surface((width, height))
         self.surface.fill((50, 50, 50))
@@ -56,9 +48,22 @@ class button():
             width,
             height
         )
-
+        
         self.surface.blit(
-            self.font.render(self.text, True, (255, 255, 255)),
-            (padding, padding)
+            self.font.render(self.title, True, (255, 255, 255)),
+            (self.padding, self.padding)
         )
-        self.rect_center_position = (self.screen_center_position[0] - width, self.screen_center_position[1])
+        self.rect_position = (self.on_screen_position[0] - width, self.on_screen_position[1])
+    
+    def Fl_clicked(self,mouse_pos):
+        if self.button_rect.collidepoint(mouse_pos):
+            if self.state:
+                self.state = 0
+            else:
+                self.state += 1
+                
+            if self.CHANGABLE:
+                self.change_text(self.titles[self.state])
+            return True
+        else:
+            return False

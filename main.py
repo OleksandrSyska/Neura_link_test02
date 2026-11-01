@@ -9,14 +9,15 @@ from classes.Car import Car
 from classes.Eyes import Eyes
 from classes.Fitness_Meter import Fitness_meter
 from classes.Fitness_Cotroler import FC
-#from classes.Button import Button
-from classes.Button import button
-from classes.Changeble_button import C_Button
+from classes.Data_screen import Data_screen
+from classes.Button import Button
 import value_control.settings as SET
 # Constants
 FPS = 60
 # variables
-gen_count = 1
+gen_count = 0
+heighest_fitness = 0
+average_fitness = 0.00
 # lists
 cars = []
 images = {}
@@ -36,20 +37,31 @@ def new_gen():
     if not cars:
         return
     gen_count += 1
-    print(f"Current generation: {gen_count}")
     heighest_fitness = 0
     heighest_fitness_index = 0
+    average_fitness = 0
     for car in cars:
         if car.fit_con.get_fitness() == heighest_fitness:
             # CROSS MUTATION !!!! WIP
             heighest_fitness = car.fit_con.get_fitness()
             heighest_fitness_index = cars.index(car)
-        if car.fit_con.get_fitness() > heighest_fitness:
+        elif car.fit_con.get_fitness() > heighest_fitness:
             heighest_fitness = car.fit_con.get_fitness()
             heighest_fitness_index = cars.index(car)
-
+        average_fitness += car.fit_con.get_fitness()
+    average_fitness /= SET.count
+    average_fitness = round(average_fitness,2)
     best_dna = cars[heighest_fitness_index].NN.get_dna()
-    print(f"Best fitnes {heighest_fitness}")
+    data_sc.update(
+        [
+            (f"Curent generation: {gen_count}",50),
+            ("Previous generation:",50),
+            (f"Best fitness: {heighest_fitness}",36),
+            (f"Average fitness: {average_fitness}",36),
+            ("Ipsum",36),
+            ("Dolor",36),
+        ]
+    )
     start_with_dna(best_dna)
 
     for car in cars:
@@ -75,14 +87,12 @@ g.time.set_timer(mutation_clock,0) # mutation delay
 images = {
     "BG" : g.image.load(f'src\\draha01.png').convert_alpha(),
     "Fitness meter" : g.image.load(f'src\\Fitness_meter.png').convert_alpha(),
-    "car" : g.image.load(f'src\\auto01.png').convert_alpha(),
-    "gen button" : g.image.load(f'src\\Gen_button.png').convert_alpha()
+    "car" : g.image.load(f'src\\auto01.png').convert_alpha()
 }
+
 # TODO CLEANUP
 #DNA_INSERT_B = dif_map[1]
 #DNA_INSERT_W = dif_map[0]
-#sc = g.display.set_mode((SCW, SCH), g.FULLSCREEN)
-
 
 # instances 
 meters = [
@@ -91,7 +101,7 @@ meters = [
     Fitness_meter(images["Fitness meter"],(396, 71),0),
     Fitness_meter(images["Fitness meter"],(500, 500),0),
     Fitness_meter(images["Fitness meter"],(575, 550),0),
-    Fitness_meter(images["Fitness meter"],(600, 550),0),
+    Fitness_meter(images["Fitness meter"],(600, 600),0),
     Fitness_meter(images["Fitness meter"],(644, 303),0),
     Fitness_meter(images["Fitness meter"],(755, 377),0),
     Fitness_meter(images["Fitness meter"],(800, 377),0),
@@ -103,8 +113,18 @@ meters = [
     Fitness_meter(images["Fitness meter"],(65, 600),90),
 ]
 eyes = Eyes()
-gen_button = button((SET.SCW,0),"NEW GEN")
-auto_gen_swicht = C_Button((SET.SCW,200),["AUTO GEN: OFF","AUTO GEN: ON"])
+gen_button = Button((SET.SCW,0),["NEW GEN"],False)
+auto_gen_swicht = Button((SET.SCW,76),["AUTO GEN: OFF","AUTO GEN: ON"],True)
+data_sc = Data_screen((SET.SCW,156),
+                [
+                    (f"Curent generation: {gen_count}",50),
+                    ("Previous generation:",50),
+                    (f"Best fitness: {heighest_fitness}",36),
+                    (f"Average fitness: {average_fitness}",36),
+                    ("Ipsum",36),
+                    ("Dolor",36),
+                ]
+                )
 bg = BG(images["BG"],c.LIGHT_BROWN,SET.SCW,SET.SCH,meters)
 for _ in range(SET.count): # create cars
     cars.append(
@@ -120,7 +140,6 @@ for _ in range(SET.count): # create cars
 
 # main loop
 clock = g.time.Clock()
-print("curent gen: " + str(gen_count))
 start_with_random_dna()
 while 1:
     for event in g.event.get():
@@ -130,6 +149,10 @@ while 1:
         if event.type == g.MOUSEBUTTONDOWN:
             mouse_pos = g.mouse.get_pos()
             if gen_button.Fl_clicked(mouse_pos):
+                if auto_gen_swicht.get_state():
+                    g.time.set_timer(mutation_clock,SET.auto_gen_time)
+                else:
+                    g.time.set_timer(mutation_clock,0)
                 new_gen()
             if auto_gen_swicht.Fl_clicked(mouse_pos):
                 if auto_gen_swicht.get_state():
@@ -145,6 +168,7 @@ while 1:
     #sc.blit(gen_button.get_image(), gen_button.get_rect())
     gen_button.draw(sc)
     auto_gen_swicht.draw(sc)
+    data_sc.draw(sc)
     for car_index in range(len(cars)): # moves and draw cars
         if not cars[car_index].get_status(): # checks if car has stopped
             inputs = eyes.lines( # gets distances
@@ -167,23 +191,20 @@ while 1:
                 for input_index in range(len(inputs)): # edit raw data to be smaller
                     inputs[input_index] = inputs[input_index] /100
                 outputs = cars[car_index].NN.predict(inputs)
-        
+
                 for output_index in range(len(outputs)): # edit calculated data
-    
+
                     #outputs[output_index] = outputs[output_index]*7 # FIXME 4*
                     outputs[0] *= 7  # Speed change
                     outputs[1] *= 3  # Angle change 
-                
+
                 cars[car_index].move(outputs)
                 for meter in meters:
                     if meter not in cars[car_index].fit_con.get_used_meters():
                         if meter.collide_check(cars[car_index].get_rect()):
                             cars[car_index].fit_con.add_used_meter(meter)
                             cars[car_index].fit_con.add_fitness()
-
-
-        #for element2 in meters:
-        #    cars[car_index].add_fitness(element2)
+        
         sc.blit(cars[car_index].get_image(),cars[car_index].get_rect())
     g.display.update()
     clock.tick(FPS)
