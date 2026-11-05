@@ -13,3 +13,10 @@ Výstupy sítě nejsou omezené, Zvážit tanh() nebo vlastní limity
 dna input STRUCTURE CHECK
 7:
 fix car rotation => probably fixed????
+
+
+8*:
++-10% best, 
+cross mutate rest of the 90% pop.
+leave 10% as thez were
++ normal mutation

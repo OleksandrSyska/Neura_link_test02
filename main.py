@@ -41,6 +41,7 @@ def new_gen():
     heighest_fitness_index = 0
     average_fitness = 0
     for car in cars:
+        # TODO 8*
         if car.fit_con.get_fitness() == heighest_fitness:
             # CROSS MUTATION !!!! WIP
             heighest_fitness = car.fit_con.get_fitness()
@@ -189,7 +190,7 @@ while 1:
                             cars[car_index].fit_con.add_fitness()
             else: # predicts and moves car
                 for input_index in range(len(inputs)): # edit raw data to be smaller
-                    inputs[input_index] = inputs[input_index] /100
+                    inputs[input_index] = inputs[input_index] /100 # TODO 9*
                 outputs = cars[car_index].NN.predict(inputs)
 
                 for output_index in range(len(outputs)): # edit calculated data
